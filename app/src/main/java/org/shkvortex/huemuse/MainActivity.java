@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private ArrayAdapter<String> spinnerAdapter;
 
     //create http values
+    //NOTE: These only work for my Hue, you'll need to find your own bridge's IP address and create a whitelisted username to make requests
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public static final String hueJSON = ("{\"alert\":\"select\"}");
     public static final String hueURL = ("http://192.168.2.15/api/t7GebakdmYOEFltD6NutJZOqkU25cuHAE-0gkTwk/lights/2/state");

@@ -90,8 +90,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     //create http values
     //NOTE: These only work for my Hue, you'll need to find your own bridge's IP address and create a whitelisted username to make requests
+    public int colour = 0;
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final String hueJSON = ("{\"alert\":\"select\"}");
+    public String hueJSON = ("{\"hue\":"+colour+"}");
     public static final String hueURL = ("http://192.168.2.15/api/t7GebakdmYOEFltD6NutJZOqkU25cuHAE-0gkTwk/lights/2/state");
     OkHttpClient client = new OkHttpClient();
 
@@ -405,7 +406,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (gammaScStale) {
                 updateGammaSc();
             }
-            handler.postDelayed(tickUi, 1000 / 60);
+            updateHue();
+            handler.postDelayed(tickUi, 1000 / 10);
         }
     };
 
@@ -422,7 +424,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         jaw.setText(String.valueOf(artifactBuffer[2]));
 
         //execute PUT if blink is true
-        if (artifactBuffer[0]) {
+        /*if (artifactBuffer[0]) {
             putRequest(hueURL, hueJSON, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -438,7 +440,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     }
                 }
             });
-        }
+        }*/
     }
     private void updateAlphaSc() {
         TextView A1 = (TextView)findViewById(R.id.A1);
@@ -489,6 +491,28 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         B3.setText(String.format("%6.2f", betaScBuffer[2]));
         TextView B4 = (TextView)findViewById(R.id.B4);
         B4.setText(String.format("%6.2f", betaScBuffer[3]));
+    }
+    private void updateHue() {
+        double alphaAv = (alphaScBuffer[0] + alphaScBuffer[1] + alphaScBuffer[2] + alphaScBuffer[3] )/ 4;
+        colour = (int) (25550 + (25550*alphaAv));
+        hueJSON = ("{\"hue\":"+colour+"}");
+        TextView A5 = (TextView)findViewById(R.id.A5);
+        A5.setText(String.format("%6.2f", alphaAv));
+        putRequest(hueURL, hueJSON, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    //String responseStr = response.body().string();
+                    // TextView res = (TextView)findViewById(R.id.res);
+                    // res.setText(responseStr);
+                }
+            }
+        });
     }
     
 

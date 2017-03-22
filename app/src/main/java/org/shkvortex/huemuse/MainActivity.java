@@ -497,7 +497,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         colour = (int) (25550 + (25550*alphaAv));
         hueJSON = ("{\"hue\":"+colour+"}");
         TextView A5 = (TextView)findViewById(R.id.A5);
-        A5.setText(String.format("%6.2f", alphaAv));
+        A5.setText(String.format("%6.2f", alphaAv ));
         putRequest(hueURL, hueJSON, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

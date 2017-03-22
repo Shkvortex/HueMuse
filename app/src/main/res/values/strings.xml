@@ -18,6 +18,11 @@
     <string name="pause">Pause/Resume</string>
     <string name="drop">Drop</string>
     <string name="muse_elem">Alpha relative:</string>
+    <string name="alpha">Alpha Score:</string>
+    <string name="beta">Beta Score:</string>
+    <string name="gamma">Gamma Score:</string>
+    <string name="theta">Theta Score:</string>
+    <string name="delta">Delta Score:</string>
 
     <string name="permission_dialog_title">Muse Needs Your Permission</string>
     <string name="permission_dialog_description">Muse needs a few permissions to work properly. On the next screens, tap "Allow" to proceed. If you deny, Muse will not work properly until you go into your Android settings and allow.</string>

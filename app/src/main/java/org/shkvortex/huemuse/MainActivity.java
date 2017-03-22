@@ -69,7 +69,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private ConnectionListener connectionListener;
     // inner class: recieve data from Muse
     private DataListener dataListener;
-
+    //buffer for scores
+    private final double[] alphaScBuffer = new double[6];
+    private boolean alphaScStale;
+    private final double[] betaScBuffer = new double[6];
+    private boolean betaScStale;
+    private final double[] thetaScBuffer = new double[6];
+    private boolean thetaScStale;
+    private final double[] deltaScBuffer = new double[6];
+    private boolean deltaScStale;
+    private final double[] gammaScBuffer = new double[6];
+    private boolean gammaScStale;
     //buffer for Artifacts
     private final boolean[] artifactBuffer = new boolean[3];
     private boolean artifactStale;
@@ -161,6 +171,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 muse.unregisterAllListeners();
                 muse.registerConnectionListener(connectionListener);
                 muse.registerDataListener(dataListener, MuseDataPacketType.ARTIFACTS);
+                muse.registerDataListener(dataListener, MuseDataPacketType.ALPHA_SCORE);
+                muse.registerDataListener(dataListener, MuseDataPacketType.THETA_SCORE);
+                muse.registerDataListener(dataListener, MuseDataPacketType.GAMMA_SCORE);
+                muse.registerDataListener(dataListener, MuseDataPacketType.DELTA_SCORE);
+                muse.registerDataListener(dataListener, MuseDataPacketType.BETA_SCORE);
+
                 // Initiate a connection to the headband and stream the data asynchronously.
                 muse.runAsynchronously();
             }
@@ -265,6 +281,37 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
     //blank method to satisfy DataListener Class
     public void receiveMuseDataPacket(final MuseDataPacket p, final Muse muse) {
+        // valuesSize returns the number of data values contained in the packet.
+        final long n = p.valuesSize();
+        switch (p.packetType()) {
+            case ALPHA_SCORE:
+                assert (alphaScBuffer.length >= n);
+                getEegChannelValues(alphaScBuffer, p);
+                alphaScStale = true;
+                break;
+            case BETA_SCORE:
+                assert (betaScBuffer.length >= n);
+                getEegChannelValues(betaScBuffer, p);
+                betaScStale = true;
+                break;
+            case GAMMA_SCORE:
+                assert (gammaScBuffer.length >= n);
+                getEegChannelValues(gammaScBuffer, p);
+                gammaScStale = true;
+                break;
+            case DELTA_SCORE:
+                assert (deltaScBuffer.length >= n);
+                getEegChannelValues(deltaScBuffer, p);
+                deltaScStale = true;
+                break;
+            case THETA_SCORE:
+                assert (thetaScBuffer.length >= n);
+                getEegChannelValues(thetaScBuffer, p);
+                thetaScStale = true;
+                break;
+            default:
+                break;
+        }
     }
     /**
      * You will receive a callback to this method each time an artifact packet is generated if you
@@ -283,6 +330,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         artifactBuffer[0] = p.getBlink();
         artifactBuffer[1] = p.getHeadbandOn();
         artifactBuffer[2] = p.getJawClench();
+    }
+        //get eeg packets
+    private void getEegChannelValues(double[] buffer, MuseDataPacket p) {
+        buffer[0] = p.getEegChannelValue(Eeg.EEG1);
+        buffer[1] = p.getEegChannelValue(Eeg.EEG2);
+        buffer[2] = p.getEegChannelValue(Eeg.EEG3);
+        buffer[3] = p.getEegChannelValue(Eeg.EEG4);
+        buffer[4] = p.getEegChannelValue(Eeg.AUX_LEFT);
+        buffer[5] = p.getEegChannelValue(Eeg.AUX_RIGHT);
     }
 
     //OkHTTP method
@@ -334,6 +390,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (artifactStale) {
                 updateArtifact();
             }
+            if (alphaScStale) {
+                updateAlphaSc();
+            }
+            if (betaScStale) {
+                updateBetaSc();
+            }
+            if (thetaScStale) {
+                updateThetaSc();
+            }
+            if (deltaScStale) {
+                updateDeltaSc();
+            }
+            if (gammaScStale) {
+                updateGammaSc();
+            }
             handler.postDelayed(tickUi, 1000 / 60);
         }
     };
@@ -369,6 +440,57 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             });
         }
     }
+    private void updateAlphaSc() {
+        TextView A1 = (TextView)findViewById(R.id.A1);
+        A1.setText(String.format("%6.2f", alphaScBuffer[0]));
+        TextView A2 = (TextView)findViewById(R.id.A2);
+        A2.setText(String.format("%6.2f", alphaScBuffer[1]));
+        TextView A3 = (TextView)findViewById(R.id.A3);
+        A3.setText(String.format("%6.2f", alphaScBuffer[2]));
+        TextView A4 = (TextView)findViewById(R.id.A4);
+        A4.setText(String.format("%6.2f", alphaScBuffer[3]));
+    }
+    private void updateThetaSc() {
+        TextView T1 = (TextView)findViewById(R.id.T1);
+        T1.setText(String.format("%6.2f", thetaScBuffer[0]));
+        TextView T2 = (TextView)findViewById(R.id.T2);
+        T2.setText(String.format("%6.2f", thetaScBuffer[1]));
+        TextView T3 = (TextView)findViewById(R.id.T3);
+        T3.setText(String.format("%6.2f", thetaScBuffer[2]));
+        TextView T4 = (TextView)findViewById(R.id.T4);
+        T4.setText(String.format("%6.2f", thetaScBuffer[3]));
+    }
+    private void updateDeltaSc() {
+        TextView D1 = (TextView)findViewById(R.id.D1);
+        D1.setText(String.format("%6.2f", deltaScBuffer[0]));
+        TextView D2 = (TextView)findViewById(R.id.D2);
+        D2.setText(String.format("%6.2f", deltaScBuffer[1]));
+        TextView D3 = (TextView)findViewById(R.id.D3);
+        D3.setText(String.format("%6.2f", deltaScBuffer[2]));
+        TextView D4 = (TextView)findViewById(R.id.D4);
+        D4.setText(String.format("%6.2f", deltaScBuffer[3]));
+    }
+    private void updateGammaSc() {
+        TextView G1 = (TextView)findViewById(R.id.G1);
+        G1.setText(String.format("%6.2f", gammaScBuffer[0]));
+        TextView G2 = (TextView)findViewById(R.id.G2);
+        G2.setText(String.format("%6.2f", gammaScBuffer[1]));
+        TextView G3 = (TextView)findViewById(R.id.G3);
+        G3.setText(String.format("%6.2f", gammaScBuffer[2]));
+        TextView G4 = (TextView)findViewById(R.id.G4);
+        G4.setText(String.format("%6.2f", gammaScBuffer[3]));
+    }
+    private void updateBetaSc() {
+        TextView B1 = (TextView)findViewById(R.id.B1);
+        B1.setText(String.format("%6.2f", betaScBuffer[0]));
+        TextView B2 = (TextView)findViewById(R.id.B2);
+        B2.setText(String.format("%6.2f", betaScBuffer[1]));
+        TextView B3 = (TextView)findViewById(R.id.B3);
+        B3.setText(String.format("%6.2f", betaScBuffer[2]));
+        TextView B4 = (TextView)findViewById(R.id.B4);
+        B4.setText(String.format("%6.2f", betaScBuffer[3]));
+    }
+    
 
 
 
